@@ -18,11 +18,6 @@ interface FlowchartPlan {
     edges: FlowchartEdge[];
 }
 
-
-/**
- * @param plan The structured flowchart plan from the AI.
- * @returns A valid Mermaid.js string.
- */
 function buildMermaidSyntaxFromPlan(plan: FlowchartPlan): string {
     const lines: string[] = [];
     lines.push('graph TD');
@@ -34,21 +29,20 @@ function buildMermaidSyntaxFromPlan(plan: FlowchartPlan): string {
 
     for (const node of plan.nodes) {
         let nodeSyntax: string;
-        const label = `"${node.label}"`; 
-
+        
         switch (node.type) {
             case 'startEnd':
-                nodeSyntax = `${node.id}(${label}):::startEnd`;
+                nodeSyntax = `${node.id}(["${node.label}"]):::startEnd`;
                 break;
             case 'decision':
-                nodeSyntax = `${node.id}{${label}}:::decision`;
+                nodeSyntax = `${node.id}{"${node.label}"}:::decision`;
                 break;
             case 'data':
-                nodeSyntax = `${node.id}[/${label}/]:::data`;
+                nodeSyntax = `${node.id}[/"${node.label}"/]:::data`;
                 break;
             case 'process':
             default:
-                nodeSyntax = `${node.id}[${label}]:::process`;
+                nodeSyntax = `${node.id}["${node.label}"]:::process`;
                 break;
         }
         lines.push(`    ${nodeSyntax};`);
@@ -58,7 +52,7 @@ function buildMermaidSyntaxFromPlan(plan: FlowchartPlan): string {
 
     for (const edge of plan.edges) {
         if (edge.label) {
-            lines.push(`    ${edge.from} -- ${edge.label} --> ${edge.to};`);
+            lines.push(`    ${edge.from} -- "${edge.label}" --> ${edge.to};`);
         } else {
             lines.push(`    ${edge.from} --> ${edge.to};`);
         }
@@ -66,7 +60,6 @@ function buildMermaidSyntaxFromPlan(plan: FlowchartPlan): string {
 
     return lines.join('\n');
 }
-
 
 export async function generateMermaidSyntax(code: string): Promise<string> {
     const configuration = vscode.workspace.getConfiguration('structurify.groq');
