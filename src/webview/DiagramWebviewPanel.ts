@@ -110,7 +110,7 @@ export class DiagramWebviewPanel {
         this._panel.webview.html = this._getHtmlForWebview(mermaidSyntax);
     }
 
-    private _getHtmlForWebview(mermaidSyntax: string): string {
+        private _getHtmlForWebview(mermaidSyntax: string): string {
         const webview = this._panel.webview;
         const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
@@ -130,7 +130,7 @@ export class DiagramWebviewPanel {
             </head>
             <body>
                 <div id="diagram-container">
-                    <pre class="mermaid">${sanitizedSyntax}</pre>
+                    <div class="mermaid">${sanitizedSyntax}</div>
                 </div>
                 <canvas id="export-canvas" style="display: none;"></canvas>
                 <script nonce="${nonce}" src="${mermaidCdnUri}"></script>

@@ -4,18 +4,25 @@ body {
     background-color: var(--vscode-editor-background);
     color: var(--vscode-editor-foreground);
     font-family: var(--vscode-font-family);
-}
-
-#diagram-container {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100vw;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#diagram-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    overflow: auto;
     padding: 2em;
     box-sizing: border-box;
 }
 
 .mermaid {
-    max-width: 100%;
+    max-width: none;
 }
