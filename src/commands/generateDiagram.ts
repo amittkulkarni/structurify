@@ -25,6 +25,12 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
         try {
             progress.report({ increment: 20, message: "Analyzing code with AI..." });
             const mermaidSyntax = await generateMermaidSyntax(selectedCode);
+
+                        // --- DEBUGGING: Log the exact syntax received from the AI ---
+            console.log("--- Mermaid Syntax from Groq ---");
+            console.log(mermaidSyntax);
+            console.log("---------------------------------");
+            
             progress.report({ increment: 80, message: "Rendering diagram..." });
             
             if (mermaidSyntax) {
