@@ -1,0 +1,64 @@
+{
+  "name": "structurify",
+  "displayName": "Structurify",
+  "description": "Instantly generate Mermaid.js diagrams from your code using AI.",
+  "publisher": "structurify",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "icon": "assets/icon.png",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:structurify.generateDiagram"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "structurify.generateDiagram",
+        "title": "Generate Logic Diagram"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorHasSelection",
+          "command": "structurify.generateDiagram",
+          "group": "generation@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Structurify",
+      "properties": {
+        "structurify.groq.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your API Key for the Groq API.",
+          "markdownDescription": "Your API Key for the [Groq API](https://console.groq.com/keys). This is required to generate diagrams."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.3.2"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "@typescript-eslint/parser": "^7.10.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  }
+}

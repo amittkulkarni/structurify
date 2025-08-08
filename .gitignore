@@ -1,0 +1,19 @@
+# Dependencies
+/node_modules
+
+# Build output
+/out
+/dist
+
+# VS Code specific
+.vscode-test/
+*.vsix
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

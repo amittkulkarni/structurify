@@ -1,0 +1,44 @@
+body {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    font-family: var(--vscode-font-family);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.mermaid {
+    text-align: center;
+}
+
+/* Style for Mermaid nodes to respect VS Code theme */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path {
+    fill: var(--vscode-editorWidget-background);
+    stroke: var(--vscode-editorWidget-border, var(--vscode-editor-foreground));
+    stroke-width: 1px;
+}
+
+.mermaid .node-label {
+    color: var(--vscode-editor-foreground) !important;
+}
+
+.mermaid .edge-path {
+    stroke: var(--vscode-editor-foreground);
+}
+
+.mermaid .arrowhead-path {
+    fill: var(--vscode-editor-foreground);
+}
+
+.mermaid .edge-label {
+    background-color: var(--vscode-editor-background) !important;
+    color: var(--vscode-editor-foreground) !important;
+}
