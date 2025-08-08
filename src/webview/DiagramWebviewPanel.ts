@@ -1,11 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
-/**
- * A helper function to escape HTML special characters.
- * This prevents the Mermaid syntax from breaking the webview's HTML structure.
- * @param unsafe The raw string to sanitize.
- * @returns A sanitized string safe for embedding in HTML.
- */
 function escapeHtml(unsafe: string): string {
     return unsafe
          .replace(/&/g, "&amp;")
@@ -46,12 +41,58 @@ export class DiagramWebviewPanel {
 
         DiagramWebviewPanel.currentPanel = new DiagramWebviewPanel(panel, extensionUri, mermaidSyntax);
     }
+    
+    public async exportDiagram() {
+        const format = await vscode.window.showQuickPick(['SVG', 'PNG'], {
+            placeHolder: 'Select export format',
+        });
+
+        if (format) {
+            this._panel.webview.postMessage({
+                command: 'export',
+                format: format.toLowerCase(),
+            });
+        }
+    }
 
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, mermaidSyntax: string) {
         this._panel = panel;
         this._extensionUri = extensionUri;
         this._update(mermaidSyntax);
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+        this._panel.webview.onDidReceiveMessage(
+            async message => {
+                switch (message.command) {
+                    case 'saveFile':
+                        this.saveFile(message.data, message.format);
+                        return;
+                }
+            },
+            null,
+            this._disposables
+        );
+    }
+    
+    private async saveFile(data: string, format: 'svg' | 'png') {
+        const uri = await vscode.window.showSaveDialog({
+            filters: { 'Images': [format] },
+            saveLabel: 'Export Diagram'
+        });
+
+        if (uri) {
+            try {
+                let buffer: Buffer;
+                if (format === 'png') {
+                    buffer = Buffer.from(data.split(',')[1], 'base64');
+                } else {
+                    buffer = Buffer.from(data, 'utf-8');
+                }
+                await vscode.workspace.fs.writeFile(uri, buffer);
+                vscode.window.showInformationMessage(`Successfully exported diagram to ${path.basename(uri.fsPath)}`);
+            } catch (err) {
+                vscode.window.showErrorMessage(`Failed to save file: ${err}`);
+            }
+        }
     }
 
     public dispose() {
@@ -74,6 +115,7 @@ export class DiagramWebviewPanel {
         const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
         const mermaidCdnUri = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+        const canvgCdnUri = 'https://cdn.jsdelivr.net/npm/canvg@4';
         const nonce = getNonce();
         const sanitizedSyntax = escapeHtml(mermaidSyntax);
 
@@ -87,10 +129,12 @@ export class DiagramWebviewPanel {
                 <title>Structurify Diagram</title>
             </head>
             <body>
-                <pre class="mermaid">
-${sanitizedSyntax}
-                </pre>
+                <div id="diagram-container">
+                    <pre class="mermaid">${sanitizedSyntax}</pre>
+                </div>
+                <canvas id="export-canvas" style="display: none;"></canvas>
                 <script nonce="${nonce}" src="${mermaidCdnUri}"></script>
+                <script nonce="${nonce}" src="${canvgCdnUri}"></script>
                 <script nonce="${nonce}" src="${scriptUri}"></script>
             </body>
             </html>`;

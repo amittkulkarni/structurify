@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/amittkulkarni/structurify.git"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -18,13 +18,22 @@
   "icon": "assets/structurify.png",
   "main": "./out/extension.js",
   "activationEvents": [
-    "onCommand:structurify.generateDiagram"
+    "onCommand:structurify.generateDiagram",
+    "onCommand:structurify.exportDiagram"
   ],
   "contributes": {
     "commands": [
       {
         "command": "structurify.generateDiagram",
-        "title": "Generate Logic Diagram"
+        "title": "Structurify: Generate Logic Diagram"
+      },
+      {
+        "command": "structurify.exportDiagram",
+        "title": "Structurify: Export Diagram",
+        "icon": {
+          "light": "assets/icon-light-download.svg",
+          "dark": "assets/icon-dark-download.svg"
+        }
       }
     ],
     "menus": {
@@ -33,6 +42,13 @@
           "when": "editorHasSelection",
           "command": "structurify.generateDiagram",
           "group": "generation@1"
+        }
+      ],
+      "webview/title": [
+        {
+          "command": "structurify.exportDiagram",
+          "when": "webviewId == 'structurifyDiagram'",
+          "group": "navigation"
         }
       ]
     },

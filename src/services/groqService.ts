@@ -13,7 +13,7 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
 
     const systemPrompt = `You are an expert software designer. Your task is to convert a given code snippet into a visually appealing and easy-to-read Mermaid.js flowchart.
 
-- LAYOUT: Use a left-to-right layout (\`graph LR\`).
+- LAYOUT: Use a top-to-down layout (\`graph TD\`).
 - NODE SHAPES: Use different shapes for different kinds of operations:
   - Use a stadium shape for the start and end nodes: \`A(["Start/End"])\`
   - Use a rhombus for conditional branches (if/else): \`B{"Is condition true?"}\`
@@ -29,7 +29,7 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
 ---
 GOOD EXAMPLE OF OUTPUT:
 \`\`\`mermaid
-graph LR
+graph TD
     classDef startEnd fill:#2ecc71,stroke:#27ae60,color:#fff
     classDef process fill:#3498db,stroke:#2980b9,color:#fff
     classDef decision fill:#e67e22,stroke:#d35400,color:#fff

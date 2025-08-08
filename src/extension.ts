@@ -1,16 +1,20 @@
 import * as vscode from 'vscode';
 import { generateDiagramCommand } from './commands/generateDiagram';
+import { exportDiagramCommand } from './commands/exportDiagram';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "structurify" is now active!');
 
-    // Register the command and push its disposable to the context
-    const disposable = vscode.commands.registerCommand(
-        'structurify.generateDiagram',
-        () => generateDiagramCommand(context)
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            'structurify.generateDiagram',
+            () => generateDiagramCommand(context)
+        ),
+        vscode.commands.registerCommand(
+            'structurify.exportDiagram',
+            () => exportDiagramCommand()
+        )
     );
-
-    context.subscriptions.push(disposable);
 }
 
 export function deactivate() {}
