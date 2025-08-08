@@ -35,7 +35,6 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
 
         } catch (error: any) {
             console.error(error);
-            // Show a more user-friendly error message
             const message = error.message.includes('API key') 
                 ? 'Groq API key is missing or invalid. Please check your settings.'
                 : `Failed to generate diagram: ${error.message}`;

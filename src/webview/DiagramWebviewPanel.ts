@@ -1,8 +1,23 @@
 import * as vscode from 'vscode';
 
+/**
+ * A helper function to escape HTML special characters.
+ * This prevents the Mermaid syntax from breaking the webview's HTML structure.
+ * @param unsafe The raw string to sanitize.
+ * @returns A sanitized string safe for embedding in HTML.
+ */
+function escapeHtml(unsafe: string): string {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
 export class DiagramWebviewPanel {
     public static currentPanel: DiagramWebviewPanel | undefined;
-    public static readonly viewType = 'structurifyDiagram'; 
+    public static readonly viewType = 'structurifyDiagram';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
@@ -13,17 +28,15 @@ export class DiagramWebviewPanel {
             ? vscode.window.activeTextEditor.viewColumn
             : undefined;
 
-        // If we already have a panel, show it.
         if (DiagramWebviewPanel.currentPanel) {
             DiagramWebviewPanel.currentPanel._panel.reveal(column);
             DiagramWebviewPanel.currentPanel._update(mermaidSyntax);
             return;
         }
 
-        // Otherwise, create a new panel.
         const panel = vscode.window.createWebviewPanel(
             DiagramWebviewPanel.viewType,
-            'Structurify Diagram', // Changed title
+            'Structurify Diagram',
             column || vscode.ViewColumn.Two,
             {
                 enableScripts: true,
@@ -37,9 +50,7 @@ export class DiagramWebviewPanel {
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, mermaidSyntax: string) {
         this._panel = panel;
         this._extensionUri = extensionUri;
-
         this._update(mermaidSyntax);
-
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
     }
 
@@ -60,14 +71,11 @@ export class DiagramWebviewPanel {
 
     private _getHtmlForWebview(mermaidSyntax: string): string {
         const webview = this._panel.webview;
-
         const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
-        
         const mermaidCdnUri = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
-
-        // Use a nonce to allow only specific scripts to be run
         const nonce = getNonce();
+        const sanitizedSyntax = escapeHtml(mermaidSyntax);
 
         return `<!DOCTYPE html>
             <html lang="en">
@@ -80,7 +88,7 @@ export class DiagramWebviewPanel {
             </head>
             <body>
                 <pre class="mermaid">
-${mermaidSyntax}
+${sanitizedSyntax}
                 </pre>
                 <script nonce="${nonce}" src="${mermaidCdnUri}"></script>
                 <script nonce="${nonce}" src="${scriptUri}"></script>

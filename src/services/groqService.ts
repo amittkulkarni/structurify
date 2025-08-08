@@ -1,11 +1,6 @@
 import * as vscode from 'vscode';
 import Groq from 'groq-sdk';
 
-/**
- * Generates Mermaid.js flowchart syntax from a code snippet using the Groq API.
- * @param code The code snippet to analyze.
- * @returns A promise that resolves to the Mermaid syntax string.
- */
 export async function generateMermaidSyntax(code: string): Promise<string> {
     const configuration = vscode.workspace.getConfiguration('structurify.groq');
     const apiKey = configuration.get<string>('apiKey');
@@ -20,7 +15,30 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
 - Analyze the logical flow of the code: function calls, conditional branches (if/else), and loops (for/while).
 - Represent each logical step as a node in the flowchart.
 - Use clear and concise labels for nodes.
-- Do NOT include any explanations, only the raw Mermaid syntax inside a single \`\`\`mermaid code block.`;
+- CRITICAL RULE: The text for each node MUST be enclosed in double quotes. For example, instead of 'A[Node Text]', you MUST write 'A["Node Text"]'. This is mandatory to handle special characters.
+- Do NOT include any explanations, only the raw Mermaid syntax inside a single \`\`\`mermaid code block.
+
+---
+GOOD EXAMPLE OF OUTPUT:
+\`\`\`mermaid
+graph TD
+    A["Start Process()"]
+    B["Is data valid?"]
+    C{"Decision Point"}
+    A --> B
+    B --> C
+\`\`\`
+
+BAD EXAMPLE (Do NOT do this):
+\`\`\`mermaid
+graph TD
+    A[Start Process()]
+    B[Is data valid?]
+    C{Decision Point}
+    A --> B
+    B --> C
+\`\`\`
+---`;
 
     try {
         const chatCompletion = await groq.chat.completions.create({
@@ -34,19 +52,17 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
                     content: `Code snippet:\n\`\`\`\n${code}\n\`\`\``,
                 }
             ],
-            model: "openai/gpt-oss-20b",
+            model: "llama3-8b-8192", 
         });
 
         const responseContent = chatCompletion.choices[0]?.message?.content || "";
         
-        // Regex to extract content between ```mermaid and ```
         const mermaidRegex = /```mermaid\s*([\s\S]*?)\s*```/;
         const match = responseContent.match(mermaidRegex);
 
         if (match && match[1]) {
             return match[1].trim();
         } else {
-            // Fallback for cases where the AI might forget the ```mermaid wrapper
             if (responseContent.trim().startsWith('graph')) {
                 return responseContent.trim();
             }
