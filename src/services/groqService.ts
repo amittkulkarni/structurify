@@ -34,7 +34,7 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
                     content: `Code snippet:\n\`\`\`\n${code}\n\`\`\``,
                 }
             ],
-            model: "gpt-oss-20b",
+            model: "openai/gpt-oss-20b",
         });
 
         const responseContent = chatCompletion.choices[0]?.message?.content || "";
