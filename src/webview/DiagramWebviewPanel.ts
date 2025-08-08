@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export class DiagramWebviewPanel {
     public static currentPanel: DiagramWebviewPanel | undefined;
-    public static readonly viewType = 'structurify';
+    public static readonly viewType = 'structurifyDiagram'; 
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
@@ -23,7 +23,7 @@ export class DiagramWebviewPanel {
         // Otherwise, create a new panel.
         const panel = vscode.window.createWebviewPanel(
             DiagramWebviewPanel.viewType,
-            'Code Logic Diagram',
+            'Structurify Diagram', // Changed title
             column || vscode.ViewColumn.Two,
             {
                 enableScripts: true,
@@ -38,10 +38,8 @@ export class DiagramWebviewPanel {
         this._panel = panel;
         this._extensionUri = extensionUri;
 
-        // Set the webview's initial html content
         this._update(mermaidSyntax);
 
-        // Listen for when the panel is disposed
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
     }
 
@@ -65,7 +63,8 @@ export class DiagramWebviewPanel {
 
         const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
-        const mermaidCdnUri = '[https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js](https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js)';
+        
+        const mermaidCdnUri = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
 
         // Use a nonce to allow only specific scripts to be run
         const nonce = getNonce();
@@ -77,11 +76,11 @@ export class DiagramWebviewPanel {
                 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src data:;">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link href="${stylesUri}" rel="stylesheet">
-                <title>Code Logic Diagram</title>
+                <title>Structurify Diagram</title>
             </head>
             <body>
                 <pre class="mermaid">
-                    ${mermaidSyntax}
+${mermaidSyntax}
                 </pre>
                 <script nonce="${nonce}" src="${mermaidCdnUri}"></script>
                 <script nonce="${nonce}" src="${scriptUri}"></script>
