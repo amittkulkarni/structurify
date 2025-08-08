@@ -5,9 +5,9 @@
 Instantly generate Mermaid.js flowchart diagrams from your code using the power of AI. Simply select a function or a block of code, right-click, and watch the logic come to life.
 
 <p align="center">
-  <img src="https://img.shields.io/visual-studio-marketplace/v/structurify.structurify?style=for-the-badge&label=Marketplace&color=blue" alt="Version">
-  <img src="https://img.shields.io/visual-studio-marketplace/i/structurify.structurify?style=for-the-badge&label=Installs&color=green" alt="Installs">
-  <img src="https://img.shields.io/github/license/amittkulkarni/structurify?style=for-the-badge" alt="License">
+ <img src="https://img.shields.io/visual-studio-marketplace/v/structurify.structurify?style=for-the-badge&label=Marketplace&color=blue" alt="Version">
+ <img src="https://img.shields.io/visual-studio-marketplace/i/structurify.structurify?style=for-the-badge&label=Installs&color=green" alt="Installs">
+ <img src="https://img.shields.io/github/license/amittkulkarni/structurify?style=for-the-badge" alt="License">
 </p>
 
 ---
