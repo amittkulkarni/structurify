@@ -65,9 +65,7 @@
     "watch": "node ./build.js --watch",
     "lint": "eslint src --ext ts"
   },
-  "dependencies": {
-    "groq-sdk": "^0.3.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",
@@ -75,6 +73,7 @@
     "@typescript-eslint/parser": "^7.10.0",
     "esbuild": "^0.25.8",
     "eslint": "^8.57.0",
+    "groq-sdk": "^0.3.2",
     "typescript": "^5.4.5"
   }
 }
