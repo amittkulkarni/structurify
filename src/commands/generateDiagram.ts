@@ -7,6 +7,10 @@ import {
 } from '../services/groqService';
 import { DiagramWebviewPanel } from '../webview/DiagramWebviewPanel';
 
+/**
+ * Command to generate a logic diagram from the selected code in the active editor.
+ * @param context The extension context for creating the webview panel.
+ */
 export async function generateDiagramCommand(context: vscode.ExtensionContext) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -28,15 +32,23 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
         {
             location: vscode.ProgressLocation.Notification,
             title: 'Generating Logic Diagram...',
-            cancellable: false,
+            cancellable: true,
         },
-        async (progress) => {
+        async (progress, token) => {
             try {
                 progress.report({
                     increment: 20,
                     message: 'Analyzing code with AI...',
                 });
-                const mermaidSyntax = await generateMermaidSyntax(selectedCode);
+                const mermaidSyntax = await generateMermaidSyntax(
+                    selectedCode,
+                    token
+                );
+
+                if (token.isCancellationRequested) {
+                    console.log('Diagram generation was cancelled.');
+                    return;
+                }
 
                 progress.report({
                     increment: 80,
@@ -50,7 +62,16 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
             } catch (error: any) {
                 console.error(error);
                 if (error instanceof ApiError) {
-                    vscode.window.showErrorMessage(error.message);
+                    vscode.window
+                        .showErrorMessage(error.message, 'Open Settings')
+                        .then((selection) => {
+                            if (selection === 'Open Settings') {
+                                vscode.commands.executeCommand(
+                                    'workbench.action.openSettings',
+                                    'structurify.groq.apiKey'
+                                );
+                            }
+                        });
                 } else if (
                     error instanceof ParsingError ||
                     error instanceof ValidationError

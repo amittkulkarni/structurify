@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+/**
+ * Escapes special HTML characters in a string to prevent rendering issues.
+ * @param unsafe The raw string to sanitize.
+ * @returns A sanitized string with HTML characters escaped.
+ */
 function escapeHtml(unsafe: string): string {
     return unsafe
         .replace(/&/g, '&amp;')
@@ -10,6 +15,9 @@ function escapeHtml(unsafe: string): string {
         .replace(/'/g, '&#039;');
 }
 
+/**
+ * Manages the webview panel that displays the Mermaid diagram.
+ */
 export class DiagramWebviewPanel {
     public static currentPanel: DiagramWebviewPanel | undefined;
     public static readonly viewType = 'structurifyDiagram';
@@ -18,6 +26,11 @@ export class DiagramWebviewPanel {
     private readonly _extensionUri: vscode.Uri;
     private _disposables: vscode.Disposable[] = [];
 
+    /**
+     * Creates or shows a new webview panel.
+     * @param extensionUri The URI of the extension's root directory.
+     * @param mermaidSyntax The Mermaid syntax to render in the panel.
+     */
     public static createOrShow(
         extensionUri: vscode.Uri,
         mermaidSyntax: string
@@ -51,6 +64,9 @@ export class DiagramWebviewPanel {
         );
     }
 
+    /**
+     * Sends a message to the webview to trigger the SVG export process.
+     */
     public async exportAsSvg() {
         this._panel.webview.postMessage({
             command: 'exportAsSvg',
@@ -64,8 +80,11 @@ export class DiagramWebviewPanel {
     ) {
         this._panel = panel;
         this._extensionUri = extensionUri;
+
         this._update(mermaidSyntax);
+
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+
         this._panel.webview.onDidReceiveMessage(
             async (message) => {
                 switch (message.command) {
@@ -79,18 +98,34 @@ export class DiagramWebviewPanel {
         );
     }
 
+    /**
+     * Handles the process of saving the exported diagram data to a file.
+     * @param data The file content as a string (SVG data).
+     */
     private async saveFile(data: string) {
+        let defaultUri;
+        if (
+            vscode.workspace.workspaceFolders &&
+            vscode.workspace.workspaceFolders.length > 0
+        ) {
+            const workspaceUri = vscode.workspace.workspaceFolders[0].uri;
+            defaultUri = vscode.Uri.joinPath(workspaceUri, 'diagram.svg');
+        }
+
         const uri = await vscode.window.showSaveDialog({
+            defaultUri: defaultUri,
             filters: { Images: ['svg'] },
             saveLabel: 'Export Diagram',
         });
 
         if (uri) {
             try {
-                let buffer: Buffer = Buffer.from(data, 'utf-8');
+                const buffer: Buffer = Buffer.from(data, 'utf-8');
                 await vscode.workspace.fs.writeFile(uri, buffer);
                 vscode.window.showInformationMessage(
-                    `Successfully exported diagram to ${path.basename(uri.fsPath)}`
+                    `Successfully exported diagram to ${path.basename(
+                        uri.fsPath
+                    )}`
                 );
             } catch (err) {
                 vscode.window.showErrorMessage(`Failed to save file: ${err}`);
@@ -109,10 +144,19 @@ export class DiagramWebviewPanel {
         }
     }
 
+    /**
+     * Updates the content of the webview panel.
+     * @param mermaidSyntax The new Mermaid syntax to render.
+     */
     private _update(mermaidSyntax: string) {
         this._panel.webview.html = this._getHtmlForWebview(mermaidSyntax);
     }
 
+    /**
+     * Generates the HTML content for the webview panel.
+     * @param mermaidSyntax The Mermaid syntax to be embedded in the HTML.
+     * @returns A string containing the full HTML document.
+     */
     private _getHtmlForWebview(mermaidSyntax: string): string {
         const webview = this._panel.webview;
         const stylesUri = webview.asWebviewUri(
@@ -151,6 +195,10 @@ export class DiagramWebviewPanel {
     }
 }
 
+/**
+ * Generates a random string to be used as a nonce for Content Security Policy.
+ * @returns A 32-character random string.
+ */
 function getNonce() {
     let text = '';
     const possible =
