@@ -90,9 +90,7 @@ function buildMermaidSyntaxFromPlan(plan: FlowchartPlan): string {
         '    classDef startEnd fill:#2ecc71,stroke:#27ae60,color:#fff,font-weight:bold;'
     );
     lines.push('    classDef process fill:#3498db,stroke:#2980b9,color:#fff;');
-    lines.push(
-        '    classDef decision fill:#e67e22,stroke:#d35400,color:#fff;'
-    );
+    lines.push('    classDef decision fill:#e67e22,stroke:#d35400,color:#fff;');
     lines.push('    classDef data fill:#9b59b6,stroke:#8e44ad,color:#fff;');
     lines.push('');
 
