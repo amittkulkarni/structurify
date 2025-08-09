@@ -1,6 +1,10 @@
 import * as vscode from 'vscode';
 import Groq from 'groq-sdk';
 
+export class ApiError extends Error {}
+export class ParsingError extends Error {}
+export class ValidationError extends Error {}
+
 interface FlowchartNode {
     id: string;
     label: string;
@@ -18,18 +22,53 @@ interface FlowchartPlan {
     edges: FlowchartEdge[];
 }
 
+/**
+ * Validates the structure of the JSON plan returned by the AI.
+ * Throws a ValidationError if the structure is incorrect.
+ */
+function validateFlowchartPlan(plan: any): asserts plan is FlowchartPlan {
+    if (!plan || typeof plan !== 'object') {
+        throw new ValidationError('The AI response is not a valid object.');
+    }
+    if (!Array.isArray(plan.nodes) || !Array.isArray(plan.edges)) {
+        throw new ValidationError(
+            'The AI response is missing "nodes" or "edges" arrays.'
+        );
+    }
+
+    for (const node of plan.nodes) {
+        if (
+            typeof node.id !== 'string' ||
+            typeof node.label !== 'string' ||
+            !['startEnd', 'process', 'decision', 'data'].includes(node.type)
+        ) {
+            throw new ValidationError('An invalid node was found in the AI response.');
+        }
+    }
+
+    for (const edge of plan.edges) {
+        if (typeof edge.from !== 'string' || typeof edge.to !== 'string') {
+            throw new ValidationError('An invalid edge was found in the AI response.');
+        }
+    }
+}
+
 function buildMermaidSyntaxFromPlan(plan: FlowchartPlan): string {
     const lines: string[] = [];
     lines.push('graph TD');
-    lines.push('    classDef startEnd fill:#2ecc71,stroke:#27ae60,color:#fff,font-weight:bold;');
+    lines.push(
+        '    classDef startEnd fill:#2ecc71,stroke:#27ae60,color:#fff,font-weight:bold;'
+    );
     lines.push('    classDef process fill:#3498db,stroke:#2980b9,color:#fff;');
-    lines.push('    classDef decision fill:#e67e22,stroke:#d35400,color:#fff;');
+    lines.push(
+        '    classDef decision fill:#e67e22,stroke:#d35400,color:#fff;'
+    );
     lines.push('    classDef data fill:#9b59b6,stroke:#8e44ad,color:#fff;');
     lines.push('');
 
     for (const node of plan.nodes) {
         let nodeSyntax: string;
-        
+
         switch (node.type) {
             case 'startEnd':
                 nodeSyntax = `${node.id}(["${node.label}"]):::startEnd`;
@@ -66,11 +105,14 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
     const apiKey = configuration.get<string>('apiKey');
 
     if (!apiKey) {
-        throw new Error('Groq API key not found. Please set it in the extension settings.');
+        throw new ApiError(
+            'Groq API key not found. Please set it in the extension settings.'
+        );
     }
 
     const groq = new Groq({ apiKey });
 
+    // prettier-ignore
     const systemPrompt = `You are a code analysis engine. Your only task is to analyze the user's code snippet and convert its logical flow into a JSON object.
 
 - The JSON object must conform to this structure: { "nodes": [], "edges": [] }.
@@ -78,34 +120,41 @@ export async function generateMermaidSyntax(code: string): Promise<string> {
 - Node "type" must be one of: 'startEnd', 'process', 'decision', or 'data'.
 - Each edge in the "edges" array must have a "from" and "to" property, linking two node IDs. Edges from a 'decision' node should include a "label" (e.g., "Yes", "No", "True", "False").
 
-CRITICAL: Your entire response MUST be a single, valid JSON object inside a \`\`\`json code block. Do NOT add any explanations or other text.`;
+CRITICAL: Your entire response MUST be a single, valid JSON object. Do NOT add any explanations, markdown formatting, or other text.`;
 
     try {
         const chatCompletion = await groq.chat.completions.create({
             messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: `Code snippet to analyze:\n\`\`\`\n${code}\n\`\`\``, }
+                { role: 'system', content: systemPrompt },
+                {
+                    role: 'user',
+                    content: `Code snippet to analyze:\n\`\`\`\n${code}\n\`\`\``,
+                },
             ],
-            model: "llama3-70b-8192",
-            response_format: { type: "json_object" }, 
+            model: 'llama3-70b-8192',
+            response_format: { type: 'json_object' },
         });
 
-        const responseContent = chatCompletion.choices[0]?.message?.content || "";
-        
-        let plan: FlowchartPlan;
-        try {
-            plan = JSON.parse(responseContent);
-        } catch (error) {
-            console.error("Failed to parse JSON from AI response:", error);
-            throw new Error('The AI returned malformed data. Please try again.');
+        const responseContent = chatCompletion.choices[0]?.message?.content;
+        if (!responseContent) {
+            throw new ParsingError('The AI returned an empty response.');
         }
-        
-        const mermaidSyntax = buildMermaidSyntaxFromPlan(plan);
-        
-        return mermaidSyntax;
 
+        const plan = JSON.parse(responseContent);
+        validateFlowchartPlan(plan); 
+
+        return buildMermaidSyntaxFromPlan(plan);
     } catch (error: any) {
-        console.error("Groq API or Parsing Error:", error);
+        console.error('Structurify Error:', error);
+        if (error instanceof Groq.APIError) {
+            throw new ApiError(`Groq API Error: ${error.message}`);
+        }
+        if (error instanceof SyntaxError) {
+            throw new ParsingError('The AI returned malformed JSON. Please try again.');
+        }
+        if (error instanceof ValidationError) {
+            throw error; 
+        }
         throw new Error(`Failed to generate diagram: ${error.message}`);
     }
 }

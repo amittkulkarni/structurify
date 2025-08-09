@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import { generateMermaidSyntax } from '../services/groqService';
+import {
+    generateMermaidSyntax,
+    ApiError,
+    ParsingError,
+    ValidationError,
+} from '../services/groqService';
 import { DiagramWebviewPanel } from '../webview/DiagramWebviewPanel';
 
 export async function generateDiagramCommand(context: vscode.ExtensionContext) {
@@ -38,22 +43,26 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
                     message: 'Rendering diagram...',
                 });
 
-                if (mermaidSyntax) {
-                    DiagramWebviewPanel.createOrShow(
-                        context.extensionUri,
-                        mermaidSyntax
-                    );
-                } else {
-                    throw new Error(
-                        'Failed to extract Mermaid syntax from the AI response.'
-                    );
-                }
+                DiagramWebviewPanel.createOrShow(
+                    context.extensionUri,
+                    mermaidSyntax
+                );
             } catch (error: any) {
                 console.error(error);
-                const message = error.message.includes('API key')
-                    ? 'Groq API key is missing or invalid. Please check your settings.'
-                    : `Failed to generate diagram: ${error.message}`;
-                vscode.window.showErrorMessage(message);
+                if (error instanceof ApiError) {
+                    vscode.window.showErrorMessage(error.message);
+                } else if (
+                    error instanceof ParsingError ||
+                    error instanceof ValidationError
+                ) {
+                    vscode.window.showErrorMessage(
+                        `AI Response Error: ${error.message}`
+                    );
+                } else {
+                    vscode.window.showErrorMessage(
+                        `An unexpected error occurred: ${error.message}`
+                    );
+                }
             }
         }
     );
