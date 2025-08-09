@@ -63,9 +63,10 @@
     "vscode:prepublish": "node ./build.js",
     "compile": "node ./build.js",
     "watch": "node ./build.js --watch",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",
@@ -73,7 +74,10 @@
     "@typescript-eslint/parser": "^7.10.0",
     "esbuild": "^0.25.8",
     "eslint": "^8.57.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "groq-sdk": "^0.3.2",
+    "prettier": "^3.6.2",
     "typescript": "^5.4.5"
   }
 }

@@ -3,11 +3,11 @@ import * as path from 'path';
 
 function escapeHtml(unsafe: string): string {
     return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 export class DiagramWebviewPanel {
@@ -18,7 +18,10 @@ export class DiagramWebviewPanel {
     private readonly _extensionUri: vscode.Uri;
     private _disposables: vscode.Disposable[] = [];
 
-    public static createOrShow(extensionUri: vscode.Uri, mermaidSyntax: string) {
+    public static createOrShow(
+        extensionUri: vscode.Uri,
+        mermaidSyntax: string
+    ) {
         const column = vscode.window.activeTextEditor
             ? vscode.window.activeTextEditor.viewColumn
             : undefined;
@@ -35,26 +38,36 @@ export class DiagramWebviewPanel {
             column || vscode.ViewColumn.Two,
             {
                 enableScripts: true,
-                localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'src', 'webview')]
+                localResourceRoots: [
+                    vscode.Uri.joinPath(extensionUri, 'src', 'webview'),
+                ],
             }
         );
 
-        DiagramWebviewPanel.currentPanel = new DiagramWebviewPanel(panel, extensionUri, mermaidSyntax);
+        DiagramWebviewPanel.currentPanel = new DiagramWebviewPanel(
+            panel,
+            extensionUri,
+            mermaidSyntax
+        );
     }
-    
+
     public async exportAsSvg() {
         this._panel.webview.postMessage({
-            command: 'exportAsSvg'
+            command: 'exportAsSvg',
         });
     }
 
-    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, mermaidSyntax: string) {
+    private constructor(
+        panel: vscode.WebviewPanel,
+        extensionUri: vscode.Uri,
+        mermaidSyntax: string
+    ) {
         this._panel = panel;
         this._extensionUri = extensionUri;
         this._update(mermaidSyntax);
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
         this._panel.webview.onDidReceiveMessage(
-            async message => {
+            async (message) => {
                 switch (message.command) {
                     case 'saveFile':
                         this.saveFile(message.data);
@@ -65,18 +78,20 @@ export class DiagramWebviewPanel {
             this._disposables
         );
     }
-    
+
     private async saveFile(data: string) {
         const uri = await vscode.window.showSaveDialog({
-            filters: { 'Images': ['svg'] },
-            saveLabel: 'Export Diagram'
+            filters: { Images: ['svg'] },
+            saveLabel: 'Export Diagram',
         });
 
         if (uri) {
             try {
                 let buffer: Buffer = Buffer.from(data, 'utf-8');
                 await vscode.workspace.fs.writeFile(uri, buffer);
-                vscode.window.showInformationMessage(`Successfully exported diagram to ${path.basename(uri.fsPath)}`);
+                vscode.window.showInformationMessage(
+                    `Successfully exported diagram to ${path.basename(uri.fsPath)}`
+                );
             } catch (err) {
                 vscode.window.showErrorMessage(`Failed to save file: ${err}`);
             }
@@ -98,11 +113,21 @@ export class DiagramWebviewPanel {
         this._panel.webview.html = this._getHtmlForWebview(mermaidSyntax);
     }
 
-        private _getHtmlForWebview(mermaidSyntax: string): string {
+    private _getHtmlForWebview(mermaidSyntax: string): string {
         const webview = this._panel.webview;
-        const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
-        const mermaidCdnUri = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+        const stylesUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(
+                this._extensionUri,
+                'src',
+                'webview',
+                'style.css'
+            )
+        );
+        const scriptUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js')
+        );
+        const mermaidCdnUri =
+            'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
         const nonce = getNonce();
         const sanitizedSyntax = escapeHtml(mermaidSyntax);
 
@@ -128,7 +153,8 @@ export class DiagramWebviewPanel {
 
 function getNonce() {
     let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const possible =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     for (let i = 0; i < 32; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }

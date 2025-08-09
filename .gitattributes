@@ -1,0 +1,17 @@
+# Set the default behavior to automatically normalize text files and enforce LF line endings.
+* text=auto eol=lf
+
+# Enforce LF for specific file types to be sure.
+*.js eol=lf
+*.ts eol=lf
+*.json eol=lf
+*.css eol=lf
+*.md eol=lf
+*.gitignore eol=lf
+*.vscodeignore eol=lf
+.prettierrc eol=lf
+.eslintrc.json eol=lf
+
+# Mark image files as binary so Git won't touch them.
+*.png binary
+*.svg binary
