@@ -1,18 +1,20 @@
 import * as vscode from 'vscode';
 import { generateDiagramCommand } from './commands/generateDiagram';
-import { exportDiagramCommand } from './commands/exportDiagram';
+import { DiagramWebviewPanel } from './webview/DiagramWebviewPanel';
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "structurify" is now active!');
-
     context.subscriptions.push(
         vscode.commands.registerCommand(
             'structurify.generateDiagram',
             () => generateDiagramCommand(context)
         ),
         vscode.commands.registerCommand(
-            'structurify.exportDiagram',
-            () => exportDiagramCommand()
+            'structurify.exportAsSvg',
+            () => {
+                if (DiagramWebviewPanel.currentPanel) {
+                    DiagramWebviewPanel.currentPanel.exportAsSvg();
+                }
+            }
         )
     );
 }

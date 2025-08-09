@@ -18,8 +18,7 @@
   "icon": "assets/structurify.png",
   "main": "./out/extension.js",
   "activationEvents": [
-    "onCommand:structurify.generateDiagram",
-    "onCommand:structurify.exportDiagram"
+    "onCommand:structurify.generateDiagram"
   ],
   "contributes": {
     "commands": [
@@ -28,12 +27,8 @@
         "title": "Structurify: Generate Logic Diagram"
       },
       {
-        "command": "structurify.exportDiagram",
-        "title": "Structurify: Export Diagram",
-        "icon": {
-          "light": "assets/icon-light-download.svg",
-          "dark": "assets/icon-dark-download.svg"
-        }
+        "command": "structurify.exportAsSvg",
+        "title": "Export as SVG"
       }
     ],
     "menus": {
@@ -44,9 +39,9 @@
           "group": "generation@1"
         }
       ],
-      "webview/title": [
+      "webview/context": [
         {
-          "command": "structurify.exportDiagram",
+          "command": "structurify.exportAsSvg",
           "when": "webviewId == 'structurifyDiagram'",
           "group": "navigation"
         }

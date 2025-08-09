@@ -42,17 +42,10 @@ export class DiagramWebviewPanel {
         DiagramWebviewPanel.currentPanel = new DiagramWebviewPanel(panel, extensionUri, mermaidSyntax);
     }
     
-    public async exportDiagram() {
-        const format = await vscode.window.showQuickPick(['SVG', 'PNG'], {
-            placeHolder: 'Select export format',
+    public async exportAsSvg() {
+        this._panel.webview.postMessage({
+            command: 'exportAsSvg'
         });
-
-        if (format) {
-            this._panel.webview.postMessage({
-                command: 'export',
-                format: format.toLowerCase(),
-            });
-        }
     }
 
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, mermaidSyntax: string) {
@@ -64,7 +57,7 @@ export class DiagramWebviewPanel {
             async message => {
                 switch (message.command) {
                     case 'saveFile':
-                        this.saveFile(message.data, message.format);
+                        this.saveFile(message.data);
                         return;
                 }
             },
@@ -73,20 +66,15 @@ export class DiagramWebviewPanel {
         );
     }
     
-    private async saveFile(data: string, format: 'svg' | 'png') {
+    private async saveFile(data: string) {
         const uri = await vscode.window.showSaveDialog({
-            filters: { 'Images': [format] },
+            filters: { 'Images': ['svg'] },
             saveLabel: 'Export Diagram'
         });
 
         if (uri) {
             try {
-                let buffer: Buffer;
-                if (format === 'png') {
-                    buffer = Buffer.from(data.split(',')[1], 'base64');
-                } else {
-                    buffer = Buffer.from(data, 'utf-8');
-                }
+                let buffer: Buffer = Buffer.from(data, 'utf-8');
                 await vscode.workspace.fs.writeFile(uri, buffer);
                 vscode.window.showInformationMessage(`Successfully exported diagram to ${path.basename(uri.fsPath)}`);
             } catch (err) {
@@ -115,7 +103,6 @@ export class DiagramWebviewPanel {
         const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
         const mermaidCdnUri = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
-        const canvgCdnUri = 'https://cdn.jsdelivr.net/npm/canvg@4';
         const nonce = getNonce();
         const sanitizedSyntax = escapeHtml(mermaidSyntax);
 
@@ -132,9 +119,7 @@ export class DiagramWebviewPanel {
                 <div id="diagram-container">
                     <div class="mermaid">${sanitizedSyntax}</div>
                 </div>
-                <canvas id="export-canvas" style="display: none;"></canvas>
                 <script nonce="${nonce}" src="${mermaidCdnUri}"></script>
-                <script nonce="${nonce}" src="${canvgCdnUri}"></script>
                 <script nonce="${nonce}" src="${scriptUri}"></script>
             </body>
             </html>`;

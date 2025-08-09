@@ -92,9 +92,6 @@ CRITICAL: Your entire response MUST be a single, valid JSON object inside a \`\`
 
         const responseContent = chatCompletion.choices[0]?.message?.content || "";
         
-        console.log("--- Raw JSON from AI ---");
-        console.log(responseContent);
-
         let plan: FlowchartPlan;
         try {
             plan = JSON.parse(responseContent);
@@ -105,9 +102,6 @@ CRITICAL: Your entire response MUST be a single, valid JSON object inside a \`\`
         
         const mermaidSyntax = buildMermaidSyntaxFromPlan(plan);
         
-        console.log("--- Generated Mermaid Syntax ---");
-        console.log(mermaidSyntax);
-
         return mermaidSyntax;
 
     } catch (error: any) {
