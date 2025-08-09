@@ -19,8 +19,7 @@ Instantly generate Mermaid.js flowchart diagrams from your code using the power 
 -   **Seamless Integration**: The generated diagram appears in a new VS Code Webview panel, right inside your editor.
 -   **Mermaid.js**: Leverages the popular Mermaid.js library for clean and clear diagram rendering.
 -   **Theme Aware**: The diagram view is styled to match your current VS Code theme (light, dark, or high contrast).
-
-
+-   **Export to SVG**: Easily export your generated diagrams as SVG files directly from the flowchart view.
 
 ---
 
@@ -42,6 +41,7 @@ You must have a **Groq API Key** to use this extension. The service is very fast
 3.  **Right-click** on the selected code.
 4.  Click on **"Generate Logic Diagram"** from the context menu.
 5.  A new panel will open with the generated flowchart.
+6.  To save the diagram, **right-click** anywhere on the flowchart and select **"Export as SVG"**.
 
 ---
 
