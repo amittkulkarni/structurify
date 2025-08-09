@@ -60,19 +60,20 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "node ./build.js",
+    "compile": "node ./build.js",
+    "watch": "node ./build.js --watch",
     "lint": "eslint src --ext ts"
   },
   "dependencies": {
     "groq-sdk": "^0.3.2"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "20.x",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
     "@typescript-eslint/parser": "^7.10.0",
+    "esbuild": "^0.25.8",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
   }
