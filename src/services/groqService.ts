@@ -47,17 +47,20 @@ interface FlowchartPlan {
  * Throws a ValidationError if the structure is incorrect.
  * @param plan The parsed JSON object from the AI response.
  */
-function validateFlowchartPlan(plan: any): asserts plan is FlowchartPlan {
+function validateFlowchartPlan(plan: unknown): asserts plan is FlowchartPlan {
     if (!plan || typeof plan !== 'object') {
         throw new ValidationError('The AI response is not a valid object.');
     }
-    if (!Array.isArray(plan.nodes) || !Array.isArray(plan.edges)) {
+
+    const p = plan as Partial<FlowchartPlan>;
+
+    if (!Array.isArray(p.nodes) || !Array.isArray(p.edges)) {
         throw new ValidationError(
             'The AI response is missing "nodes" or "edges" arrays.'
         );
     }
 
-    for (const node of plan.nodes) {
+    for (const node of p.nodes) {
         if (
             typeof node.id !== 'string' ||
             typeof node.label !== 'string' ||
@@ -69,7 +72,7 @@ function validateFlowchartPlan(plan: any): asserts plan is FlowchartPlan {
         }
     }
 
-    for (const edge of plan.edges) {
+    for (const edge of p.edges) {
         if (typeof edge.from !== 'string' || typeof edge.to !== 'string') {
             throw new ValidationError(
                 'An invalid edge was found in the AI response.'
@@ -192,9 +195,10 @@ CRITICAL: Your entire response MUST be a single, valid JSON object. Do NOT add a
         validateFlowchartPlan(plan);
 
         return buildMermaidSyntaxFromPlan(plan);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Structurify Error:', error);
-        if (error.name === 'AbortError') {
+
+        if (error instanceof Error && error.name === 'AbortError') {
             console.log('Groq API request was cancelled by the user.');
             return '';
         }
@@ -209,6 +213,9 @@ CRITICAL: Your entire response MUST be a single, valid JSON object. Do NOT add a
         if (error instanceof ValidationError) {
             throw error;
         }
-        throw new Error(`Failed to generate diagram: ${error.message}`);
+        if (error instanceof Error) {
+            throw new Error(`Failed to generate diagram: ${error.message}`);
+        }
+        throw new Error('An unknown error occurred during diagram generation.');
     }
 }

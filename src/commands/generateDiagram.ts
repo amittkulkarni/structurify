@@ -59,7 +59,7 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
                     context.extensionUri,
                     mermaidSyntax
                 );
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error(error);
                 if (error instanceof ApiError) {
                     vscode.window
@@ -76,12 +76,20 @@ export async function generateDiagramCommand(context: vscode.ExtensionContext) {
                     error instanceof ParsingError ||
                     error instanceof ValidationError
                 ) {
+                    const message =
+                        error instanceof Error
+                            ? error.message
+                            : 'An unknown error occured.';
                     vscode.window.showErrorMessage(
-                        `AI Response Error: ${error.message}`
+                        `AI Response Error: ${message}`
+                    );
+                } else if (error instanceof Error) {
+                    vscode.window.showErrorMessage(
+                        `An unexpected error occurred: ${error.message}`
                     );
                 } else {
                     vscode.window.showErrorMessage(
-                        `An unexpected error occurred: ${error.message}`
+                        'An unexpected and unknown error occured.'
                     );
                 }
             }
