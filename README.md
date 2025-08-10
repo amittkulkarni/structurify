@@ -1,7 +1,7 @@
 # Structurify
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/amittkulkarni/structurify/master/assets/structurify.svg" alt="Structurify Logo" width="450">
+  <img src="https://raw.githubusercontent.com/amittkulkarni/structurify/master/assets/structurify.svg" alt="Structurify Logo" width="350">
 </p>
 
 Instantly generate Mermaid.js flowchart diagrams from your code using the power of AI. Simply select a function or a block of code, right-click, and watch the logic come to life.
