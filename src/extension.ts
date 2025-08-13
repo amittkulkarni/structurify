@@ -1,16 +1,23 @@
 import * as vscode from 'vscode';
 import { generateDiagramCommand } from './commands/generateDiagram';
 import { DiagramWebviewPanel } from './webview/DiagramWebviewPanel';
+import { DiagramType } from './services/common';
 
-/**
- * This method is called when your extension is activated.
- * It initializes the commands that are defined in the package.json file.
- * @param context The extension context provided by VS Code.
- */
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('structurify.generateDiagram', () =>
-            generateDiagramCommand(context)
+        vscode.commands.registerCommand('structurify.generateFlowchart', () =>
+            generateDiagramCommand(context, DiagramType.Flowchart)
+        ),
+        vscode.commands.registerCommand(
+            'structurify.generateSequenceDiagram',
+            () => generateDiagramCommand(context, DiagramType.Sequence)
+        ),
+        vscode.commands.registerCommand(
+            'structurify.generateClassDiagram',
+            () => generateDiagramCommand(context, DiagramType.Class)
+        ),
+        vscode.commands.registerCommand('structurify.generateErDiagram', () =>
+            generateDiagramCommand(context, DiagramType.ER)
         ),
         vscode.commands.registerCommand('structurify.exportAsSvg', () => {
             if (DiagramWebviewPanel.currentPanel) {
@@ -20,7 +27,4 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
-/**
- * This method is called when your extension is deactivated.
- */
 export function deactivate() {}

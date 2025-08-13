@@ -1,97 +1,141 @@
 {
-  "name": "structurify",
-  "displayName": "Structurify",
-  "description": "Instantly generate Mermaid.js diagrams from your code using AI.",
-  "publisher": "structurify",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/amittkulkarni/structurify.git"
-  },
-  "homepage": "https://github.com/amittkulkarni/structurify",
-  "bugs": {
-    "url": "https://github.com/amittkulkarni/structurify/issues"
-  },
-  "keywords": [
-    "mermaid",
-    "diagram",
-    "flowchart",
-    "ai",
-    "groq",
-    "llama3",
-    "visualize",
-    "code analysis"
-  ],
-  "version": "1.0.3",
-  "engines": {
-    "vscode": "^1.85.0"
-  },
-  "categories": [
-    "Other",
-    "Visualization"
-  ],
-  "icon": "assets/structurify.png",
-  "main": "./out/extension.js",
-  "activationEvents": [
-    "onCommand:structurify.generateDiagram"
-  ],
-  "contributes": {
-    "commands": [
-      {
-        "command": "structurify.generateDiagram",
-        "title": "Structurify: Generate Logic Diagram"
-      },
-      {
-        "command": "structurify.exportAsSvg",
-        "title": "Export as SVG"
-      }
-    ],
-    "menus": {
-      "editor/context": [
-        {
-          "when": "editorHasSelection",
-          "command": "structurify.generateDiagram",
-          "group": "generation@1"
-        }
-      ],
-      "webview/context": [
-        {
-          "command": "structurify.exportAsSvg",
-          "when": "webviewId == 'structurifyDiagram'",
-          "group": "navigation"
-        }
-      ]
+    "name": "structurify",
+    "displayName": "Structurify",
+    "description": "Instantly generate Mermaid.js diagrams from your code using AI.",
+    "publisher": "structurify",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/amittkulkarni/structurify.git"
     },
-    "configuration": {
-      "title": "Structurify",
-      "properties": {
-        "structurify.groq.apiKey": {
-          "type": "string",
-          "default": "",
-          "description": "Your API Key for the Groq API.",
-          "markdownDescription": "Your API Key for the [Groq API](https://console.groq.com/keys). This is required to generate diagrams."
+    "homepage": "https://github.com/amittkulkarni/structurify",
+    "bugs": {
+        "url": "https://github.com/amittkulkarni/structurify/issues"
+    },
+    "keywords": [
+        "mermaid",
+        "diagram",
+        "flowchart",
+        "sequence diagram",
+        "class diagram",
+        "er diagram",
+        "ai",
+        "groq",
+        "llama3",
+        "visualize"
+    ],
+    "version": "1.1.0",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": ["Other", "Visualization"],
+    "icon": "assets/structurify.png",
+    "main": "./out/extension.js",
+    "activationEvents": [
+        "onCommand:structurify.generateFlowchart",
+        "onCommand:structurify.generateSequenceDiagram",
+        "onCommand:structurify.generateClassDiagram",
+        "onCommand:structurify.generateErDiagram"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "structurify.generateFlowchart",
+                "title": "Structurify: Generate Flowchart"
+            },
+            {
+                "command": "structurify.generateSequenceDiagram",
+                "title": "Structurify: Generate Sequence Diagram"
+            },
+            {
+                "command": "structurify.generateClassDiagram",
+                "title": "Structurify: Generate Class Diagram"
+            },
+            {
+                "command": "structurify.generateErDiagram",
+                "title": "Structurify: Generate ER Diagram"
+            },
+            {
+                "command": "structurify.exportAsSvg",
+                "title": "Export as SVG"
+            }
+        ],
+        "submenus": [
+            {
+                "id": "structurify.generate",
+                "label": "Structurify: Generate Diagram"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "when": "editorHasSelection",
+                    "submenu": "structurify.generate",
+                    "group": "generation@1"
+                }
+            ],
+            "structurify.generate": [
+                {
+                    "command": "structurify.generateFlowchart",
+                    "group": "1_structure"
+                },
+                {
+                    "command": "structurify.generateSequenceDiagram",
+                    "group": "1_structure"
+                },
+                {
+                    "command": "structurify.generateClassDiagram",
+                    "group": "1_structure"
+                },
+                {
+                    "command": "structurify.generateErDiagram",
+                    "group": "1_structure"
+                }
+            ],
+            "webview/context": [
+                {
+                    "command": "structurify.exportAsSvg",
+                    "when": "webviewId == 'structurifyDiagram'",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "Structurify",
+            "properties": {
+                "structurify.groq.apiKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Your API Key for the Groq API.",
+                    "markdownDescription": "Your API Key for the [Groq API](https://console.groq.com/keys). This is required to generate diagrams."
+                },
+                "structurify.ai.model": {
+                    "type": "string",
+                    "default": "llama3-70b-8192",
+                    "description": "The Groq model to use for diagram generation.",
+                    "enum": ["llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768", "gemma-7b-it"]
+                }
+            }
         }
-      }
+    },
+    "scripts": {
+        "vscode:prepublish": "node ./build.js",
+        "compile": "node ./build.js",
+        "watch": "node ./build.js --watch",
+        "lint": "eslint src --ext ts",
+        "format": "prettier --write \"src/**/*.ts\"",
+        "format:check": "prettier --check \"src/**/*.ts\""
+    },
+    "devDependencies": {
+        "@types/node": "20.x",
+        "@types/vscode": "^1.85.0",
+        "@typescript-eslint/eslint-plugin": "^7.10.0",
+        "@typescript-eslint/parser": "^7.10.0",
+        "esbuild": "^0.25.8",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "groq-sdk": "^0.3.2",
+        "prettier": "^3.6.2",
+        "typescript": "^5.4.5"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "node ./build.js",
-    "compile": "node ./build.js",
-    "watch": "node ./build.js --watch",
-    "lint": "eslint src --ext ts",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
-  },
-  "devDependencies": {
-    "@types/node": "20.x",
-    "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^7.10.0",
-    "@typescript-eslint/parser": "^7.10.0",
-    "esbuild": "^0.25.8",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "groq-sdk": "^0.3.2",
-    "prettier": "^3.6.2",
-    "typescript": "^5.4.5"
-  }
 }
