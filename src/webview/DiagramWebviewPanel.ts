@@ -2,20 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 /**
- * Escapes special HTML characters in a string to prevent rendering issues.
- * @param unsafe The raw string to sanitize.
- * @returns A sanitized string with HTML characters escaped.
- */
-function escapeHtml(unsafe: string): string {
-    return unsafe
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
-/**
  * Manages the webview panel that displays the Mermaid diagram.
  */
 export class DiagramWebviewPanel {
@@ -173,8 +159,10 @@ export class DiagramWebviewPanel {
         const mermaidCdnUri =
             'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
         const nonce = getNonce();
-        const sanitizedSyntax = escapeHtml(mermaidSyntax);
-
+        
+        // **THE FIX**: Removed the incorrect escaping of the mermaidSyntax.
+        // The Mermaid library expects the raw syntax.
+        
         return `<!DOCTYPE html>
             <html lang="en">
             <head>
@@ -186,7 +174,7 @@ export class DiagramWebviewPanel {
             </head>
             <body>
                 <div id="diagram-container">
-                    <div class="mermaid">${sanitizedSyntax}</div>
+                    <div class="mermaid">${mermaidSyntax}</div>
                 </div>
                 <script nonce="${nonce}" src="${mermaidCdnUri}"></script>
                 <script nonce="${nonce}" src="${scriptUri}"></script>

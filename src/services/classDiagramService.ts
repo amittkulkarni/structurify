@@ -17,6 +17,27 @@ interface ClassPlan {
     relationships: Relationship[];
 }
 
+function sanitizePlan(plan: any): ClassPlan {
+    const sanitizeId = (id: string) => id.replace(/[^a-zA-Z0-9_]/g, '');
+
+    plan.classes.forEach((cls: any) => {
+        if (cls.id) {
+            cls.id = sanitizeId(cls.id);
+        }
+    });
+
+    plan.relationships.forEach((rel: any) => {
+        if (rel.from) {
+            rel.from = sanitizeId(rel.from);
+        }
+        if (rel.to) {
+            rel.to = sanitizeId(rel.to);
+        }
+    });
+
+    return plan;
+}
+
 /**
  * Validates the structure of the JSON plan for a class diagram.
  * Throws a ValidationError if the structure is incorrect.
@@ -105,13 +126,14 @@ export async function generateClassDiagram(
     const systemPrompt = `You are an expert in code analysis. Convert the user's code into a JSON object for a class diagram.
 
 - The JSON must have "classes" and "relationships".
-- Each class needs an "id", "properties" array, and "methods" array.
+- Each class "id" MUST be a single word (e.g., "UserService", "OrderDTO").
 - Each relationship must have "from", "to", "type" ('inheritance', 'composition', 'aggregation', 'association'), and an optional "label".
 
-CRITICAL: Respond with a single, valid JSON object only.`;
+CRITICAL: Respond with a single, valid JSON object only. IDs must not contain spaces or special characters.`;
     
     const json = await callGroqApi(code, systemPrompt, token);
-    const plan = JSON.parse(json);
+    let plan = JSON.parse(json);
+    plan = sanitizePlan(plan);
     validatePlan(plan);
     return buildMermaidSyntax(plan);
 }

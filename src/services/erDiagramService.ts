@@ -16,6 +16,27 @@ interface ErPlan {
     relationships: ErRelationship[];
 }
 
+function sanitizePlan(plan: any): ErPlan {
+    const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9_]/g, '');
+
+    plan.entities.forEach((entity: any) => {
+        if (entity.name) {
+            entity.name = sanitizeName(entity.name);
+        }
+    });
+
+    plan.relationships.forEach((rel: any) => {
+        if (rel.from) {
+            rel.from = sanitizeName(rel.from);
+        }
+        if (rel.to) {
+            rel.to = sanitizeName(rel.to);
+        }
+    });
+
+    return plan;
+}
+
 /**
  * Validates the structure of the JSON plan for an ER diagram.
  * Throws a ValidationError if the structure is incorrect.
@@ -102,13 +123,14 @@ export async function generateErDiagram(
     const systemPrompt = `You are an expert in database-related code analysis. Convert the user's code (e.g., ORM models, SQL schemas) into a JSON object for an ER diagram.
 
 - The JSON must have "entities" and "relationships".
-- Each entity needs a "name" and "columns" array. Each column has a "name", "type", and "keys" array ('PK', 'FK').
+- Each entity "name" MUST be a single word (e.g., "Users", "OrderItems").
 - Each relationship must have "from", "to", "cardinality" (e.g., "|o--||"), and a "label".
 
-CRITICAL: Respond with a single, valid JSON object only.`;
+CRITICAL: Respond with a single, valid JSON object only. Entity names must not contain spaces or special characters.`;
     
     const json = await callGroqApi(code, systemPrompt, token);
-    const plan = JSON.parse(json);
+    let plan = JSON.parse(json);
+    plan = sanitizePlan(plan);
     validatePlan(plan);
     return buildMermaidSyntax(plan);
 }
