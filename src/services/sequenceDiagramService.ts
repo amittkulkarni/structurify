@@ -75,7 +75,7 @@ function buildMermaidSyntax(plan: SequencePlan): string {
         // Corrected arrow logic for Mermaid syntax
         const arrows = {
             sync: '->>',
-            async: '->',
+            async: '->)',
             reply: '-->>'
         };
         const arrow = arrows[s.type] || '->>';

@@ -17,7 +17,7 @@ interface ErPlan {
 }
 
 function sanitizePlan(plan: any): ErPlan {
-    const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9_]/g, '');
+    const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9_]/g, '_');
 
     plan.entities.forEach((entity: any) => {
         if (entity.name) {

@@ -114,7 +114,11 @@ function buildMermaidSyntax(plan: FlowchartPlan): string {
     }
 
     // Using trim() on each line to remove any accidental whitespace.
-    return lines.map(line => line.trim()).join('\n');
+    const mermaidSyntax = lines.map(line => line.trim()).join('\n');
+    console.log("--- Generated Mermaid Syntax ---");
+    console.log(mermaidSyntax);
+    console.log("------------------------------");
+    return mermaidSyntax;
 }
 
 export async function generateFlowchart(
@@ -130,8 +134,14 @@ CRITICAL: Your entire response MUST be a single, valid JSON object and nothing e
     
     try {
         const json = await callGroqApi(code, systemPrompt, token);
+        console.log("--- Raw AI Response ---");
+        console.log(json);
+        console.log("-----------------------");
         const plan = JSON.parse(json);
         const sanitizedPlan = sanitizeAndFilterPlan(plan);
+        console.log("--- Sanitized Plan ---");
+        console.log(JSON.stringify(sanitizedPlan, null, 2));
+        console.log("----------------------");
         return buildMermaidSyntax(sanitizedPlan);
     } catch (error) {
         if (error instanceof ValidationError || error instanceof SyntaxError) {

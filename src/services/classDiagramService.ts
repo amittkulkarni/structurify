@@ -18,7 +18,7 @@ interface ClassPlan {
 }
 
 function sanitizePlan(plan: any): ClassPlan {
-    const sanitizeId = (id: string) => id.replace(/[^a-zA-Z0-9_]/g, '');
+    const sanitizeId = (id: string) => id.replace(/[^a-zA-Z0-9_]/g, '_');
 
     plan.classes.forEach((cls: any) => {
         if (cls.id) {
